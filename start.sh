@@ -12,6 +12,12 @@ start_claude() {
   tmux new-session -d -s claude 'cd /work && /root/.local/bin/claude remote-control'
 }
 
+# Claude Code lives in /root (mounted, survives image updates) and its own auto-update was not running here,
+# so update it on every container start - Watchtower restarts the container with each new image (every ~2 weeks).
+if [ -x /root/.local/bin/claude ]; then
+  timeout 300 /root/.local/bin/claude update 2>&1 | tail -2 || true
+fi
+
 start_claude
 echo 'claude-ops ready'
 
